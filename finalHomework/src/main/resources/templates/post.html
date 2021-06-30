@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <title>TODAY NOTICE</title>
+
+    <script>
+        $(document).ready(function () {
+            ShowNotice();
+        })
+
+        function ShowNotice() {
+            $('#getNotice').empty();
+
+            const id =[[${id}]];
+
+            $.ajax({
+                type: 'GET',
+                url: `/api/notices/${id}`,
+                success: function (response) {
+                    let notice = response
+                    let id = notice.id;
+                    let title = notice.title;
+                    let username = notice.username;
+                    let contents = notice.contents;
+                    let modifiedAt = notice.modifiedAt;
+                    let time = modifiedAt.split("T")[0];
+                    addHTML(id,title,username, contents, time)
+
+
+                }
+            })
+        }
+
+        function addHTML(id, title, username, contents, time) {
+            // 1. HTML 태그를 만듭니다.
+            let tempHtml = `<h2 class="post-title">${title}</h2>
+                            <h3 class="post-subtitle">${contents}</h3>
+                            <p class="post-meta">
+                                Posted by
+                                <span style="color: blue">${username}</span>
+                                ${time}
+                            </p>
+                            <hr class="my-4"/>`
+            $('#getNotice').append(tempHtml);
+        }
+    </script>
+</head>
+<body>
+<div class="jumbotron">
+    <h1 class="display-4"><a href="/">TODAY NOTICE</a></h1>
+</div>
+<hr class="my-4" />
+<div class="post-preview" id ="getNotice">
+    <a href="post.html">
+        <h2 class="post-title">Failure is not an option</h2>
+        <h3 class="post-subtitle">Many say exploration is part of our destiny, but it’s actually our duty to future
+            generations.</h3>
+    </a>
+    <p class="post-meta">
+        Posted by
+        <a href="#!">Start Bootstrap</a>
+        on July 8, 2021
+    </p>
+    <hr class="my-4"/>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <title>TODAY NOTICE</title>
+
+    <script>
+
+        function postNotice(){
+            let title = $('#titleInput').val();
+            let contents = $('#contentsInput').val();
+            let username = $('#usernameInput').val();
+            if ((title == '') || (contents == '') || (username == '')) {
+                alert("빈칸이 있습니다. 내용을입력하여주세요")
+                return;
+            }
+            // xss 공격대비
+            if ((title.includes("<script>")) || (contents.includes("<script>")) || (username.includes("<script>"))) {
+                alert("부적절한 표현입니다. 다시 작성해주세요")
+                return;
+            }
+            let data = {'title': title,'username': username, 'contents': contents};
+
+            $.ajax({
+                type: "POST",
+                url: "/api/notices",
+                contentType: "application/json", // JSON 형식으로 전달함을 알리기
+                data: JSON.stringify(data),
+                success: function (response){
+                    alert("등록성공")
+                    window.location.reload();
+                }
+            });
+        }
+        $(document).ready(function () {
+            // HTML 문서를 로드할 때마다 실행합니다.
+            getNotice();
+        })
+        function getNotice() {
+            // 1. 기존 메모 내용을 지웁니다.
+            $('#getNotice').empty();
+            // 2. 메모 목록을 불러와서 HTML로 붙입니다.
+            $.ajax({
+                type: 'GET',
+                url: '/api/notices',
+                success: function (response) {
+                    for (let i = 0; i < response.length; i++) {
+                        let notice = response[i];
+                        let id = notice.id;
+                        let title = notice.title;
+                        let username = notice.username;
+                        let contents = notice.contents;
+                        let modifiedAt = notice.modifiedAt;
+                        let time = modifiedAt.split("T")[0];
+                        addHTML(id,title,username, contents, time)
+
+                    }
+                }
+            })
+        }
+
+        function addHTML(id, title, username, contents, time) {
+            // 1. HTML 태그를 만듭니다.
+            let tempHtml = `<a id="post-${id}" href="http://localhost:8080/notices/${id}">
+                                <h2 class="post-title">${title}</h2>
+                            </a>
+                            <p class="post-meta">
+                                Posted by
+                                <span style="color: blue">${username}</span>
+                                ${time}
+                                <button id="${id}-delete" class="btn" style="background-color: coral"  onclick="deleteOne('${id}')">삭제버튼</button>
+                            </p>
+                            <hr class="my-4"/>`
+            $('#getNotice').append(tempHtml);
+        }
+        function deleteOne(id) {
+            // 1. DELETE /api/memos/{id} 에 요청해서 메모를 삭제합니다.
+            $.ajax({
+                type: "DELETE",
+                url: `/api/notices/${id}`,
+                success: function (response) {
+                    alert('메시지 삭제에 성공하였습니다.');
+                    window.location.reload();
+                }
+            })
+        }
+
+    </script>
+</head>
+<body>
+<div class="jumbotron">
+    <h1 class="display-4">TODAY NOTICE</h1>
+    <div class="form-group">
+        <label>오늘의 할일</label>
+        <input type="email" class="form-control" id="titleInput" placeholder="">
+    </div>
+    <div class="form-group">
+        <label>작성자명</label>
+        <input type="email" class="form-control" id="usernameInput" placeholder="">
+    </div>
+    <div class="form-group">
+        <label>자세한 일정을 쓰세요</label>
+        <textarea class="form-control" id="contentsInput" rows="3"></textarea>
+    </div>
+    <p class="lead">
+        <button class="btn btn-primary" onclick="postNotice()">등록하기</button>
+    </p>
+</div>
+<hr class="my-4" />
+<div class="post-preview" id ="getNotice">
+    <a href="post.html">
+        <h2 class="post-title">Failure is not an option</h2>
+        <h3 class="post-subtitle">Many say exploration is part of our destiny, but it’s actually our duty to future
+            generations.</h3>
+    </a>
+    <p class="post-meta">
+        Posted by
+        <a href="#!">Start Bootstrap</a>
+        on July 8, 2021
+    </p>
+    <hr class="my-4"/>
+</div>
+
+
+</body>
+</html>
